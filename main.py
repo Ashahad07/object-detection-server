@@ -10,12 +10,18 @@ CORS(app)
 
 model = YOLO("yolov8n.pt")
 
+# Warmup to avoid timeout on first request
+print("Warming up YOLO model...")
+dummy_img = np.zeros((640, 640, 3), dtype=np.uint8)
+model.predict(dummy_img)
+print("Model warmup complete ✅")
+
 def read_image_from_file(file):
     npimg = np.frombuffer(file.read(), np.uint8)
     return cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
 def predict_objects(image):
-    results = model.predict(source=image)
+    results = model.predict(source=image, verbose=False)
     output = []
     for result in results:
         for box in result.boxes:
